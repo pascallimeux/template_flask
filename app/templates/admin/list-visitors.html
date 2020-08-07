@@ -1,0 +1,30 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container"> 
+    <table id="mytable" class="table tablesorter mb-5">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Platform</th>
+          <th>Browser</th>
+          <th>IP Address</th>
+          <th>Visited at</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visitor in visitors%} 
+        <tr> 
+          <td class="align-middle">{{ visitor.user.username if visitor.user else 'unknown' }}</td>
+          <td class="align-middle">{{ visitor.platform }}</td>
+          <td class="align-middle">{{ visitor.browser }}</td>
+          <td class="align-middle">{{ visitor.ip_address }}</td>
+          <td class="align-middle">{{ visitor.visited_at.strftime('%y/%m/%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      
+    </table>
+</div>
+
+{% endblock %}

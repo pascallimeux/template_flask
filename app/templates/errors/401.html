@@ -1,0 +1,9 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="error-page">
+    <h1 class="error-page">Unauthenticated (401)</h1>
+    <h4>{{ error if error else "Unauthenticated account."}}</h4>
+    <p><a href="{{ url_for('home.index') }}">return</a></p>
+ </div>
+{% endblock %}

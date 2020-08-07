@@ -1,0 +1,9 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="error-page">
+    <h1 class="error-page">Page Not Found (404)</h1>
+    <h4>{{ error if error else "This page does not exist."}}</h4>
+    <p><a href="{{ url_for('home.index') }}">return</a></p>
+ </div>
+{% endblock %}

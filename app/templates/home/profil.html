@@ -1,0 +1,61 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+<h1>Profil</h1>
+<p>Your account details are below:</p>
+<table>
+    <tr>
+        <td>Username:</td>
+        <td>{{ current_user.username }}</td>
+    </tr>
+    <tr>
+        <td>Id:</td>
+        <td>{{ current_user.id }}</td>
+    </tr>
+    <tr>
+        <td>Firstname:</td>
+        <td>{{ current_user.firstname }}</td>
+    </tr>
+    <tr>
+        <td>Lastname:</td>
+        <td>{{ current_user.lastname }}</td>
+    </tr>
+    <tr>
+        <td>Role:</td>
+        <td>{{ roles_list(current_user.role).name.capitalize() }}</td>
+    </tr>
+    <tr>
+        <td>Email:</td>
+        <td>{{ current_user.email }}</td>
+    </tr>
+</table>
+
+{% if visitor is defined %}
+
+    <h2>Visitor</h2>
+    <table>
+        <tr>
+            <td>IP address:</td>
+            <td>{{ visitor.ip_address }}</td>
+        </tr>
+        <tr>
+            <td>Browser:</td>
+            <td>{{ visitor.browser }}</td>
+        </tr>
+        <tr>
+            <td>Platform:</td>
+            <td>{{ visitor.platform }}</td>
+        </tr>
+        <tr>
+            <td>Visited at:</td>
+            <td>{{ visitor.visited_at.strftime('%y/%m/%d %H:%M') }}</td>
+        </tr>
+    </table>
+{% endif %}
+<div class="container mt-3">
+    <div class="row">
+      <div class="col">
+        <img src="data:image/png;base64,{{ qrcode }}" width=150 />
+      </div>
+    </div>
+  </div>
+{% endblock %}

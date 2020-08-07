@@ -1,0 +1,111 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<form action="{{ url_for('user.user_edit', userid=form.id.data) }}" method="post">
+    <div class="user">
+        <div class="user-screen">
+            <div class="user-title">
+                <h1>Edit User</h1>
+            </div>
+            <div class="user-form">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.username.label(class="form-label is-required") }}
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control is-invalid") }}
+                        <ul class="errors invalid-feedback">
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {% if not owner %}
+                            {{ form.username(class="form-control", disabled=True) }}
+                        {% else %}
+                            {{ form.username(class="form-control") }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.firstname.label(class="form-label is-required") }}
+                    {% if form.firstname.errors %}
+                        {{ form.firstname(class="form-control is-invalid") }}
+                        <ul class="errors invalid-feedback">
+                            {% for error in form.firstname.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {% if not owner %}
+                            {{ form.firstname(class="form-control", disabled=True) }}
+                        {% else %}
+                            {{ form.firstname(class="form-control") }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.lastname.label(class="form-label is-required") }}
+                    {% if form.lastname.errors %}
+                        {{ form.lastname(class="form-control is-invalid") }}
+                        <ul class="errors invalid-feedback">
+                            {% for error in form.lastname.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {% if not owner %}
+                            {{ form.lastname(class="form-control", disabled=True) }}
+                        {% else %}
+                            {{ form.lastname(class="form-control") }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label is-required") }}
+                    {% if form.email.errors %}
+                    {{ form.email(class="form-control is-invalid") }}
+                    <ul class="errors invalid-feedback">
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {% if not owner %}
+                        {{ form.email(class="form-control", disabled=True) }}
+                    {% else %}
+                        {{ form.email(class="form-control") }}
+                    {% endif %}
+                {% endif %}
+               </div>
+
+                <div class="form-group">
+                    {{ form.role.label(class="form-label") }}
+                    <select name="role" class="custom-select" {% if not admin %} disabled=True {% endif %}>
+                    {% for r in roles_list %}
+                        <option value="{{ r.value }}" {% if r.value|int == form.role.data|int %} selected {% endif %}>{{ r.name.capitalize() }}</option>
+                    {% endfor %}
+      
+                    </select>
+                </div>
+
+                <div class="form-group">
+                  <div class="custom-control custom-checkbox">
+                    <input class="custom-control-input" type="checkbox" id="active" name="active" {% if form.active.data %} checked {% endif %} {% if not admin %} disabled=True {% endif %}>
+                    {{ form.active.label(class="custom-control-label") }}
+                  </div>
+                </div>
+
+                <div class="btn-group action-form">
+                  {{ form.back(class="btn btn-secondary mr-3") }}
+                  {{ form.submit(class="btn btn-primary mr-3") }}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

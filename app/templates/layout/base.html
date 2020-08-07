@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ title if title else 'No title' }}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/orangeHelvetica.min.css') }}">
+    <link rel="stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/orangeIcons.min.css') }}">
+    <link rel="stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/boosted.min.css') }}">
+    <link rel="stylesheet" type= "text/css" href="https://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css">  {# use for sort and pagination table #}
+    <link rel="stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+</head>
+<body>
+
+  {% if current_user.is_authenticated %}
+    {% include 'layout/nav.html' %}
+  {% endif %}
+  
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  <span class="alert-icon"><span class="sr-only">{{ category }}</span></span>
+                  <p>{{ message }}</p>
+                  <button type="button" class="close" data-dismiss="alert">
+                    <span class="sr-only">Close message</span>
+                  </button>
+                </div>
+
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% block content %} {% endblock %}
+  
+    {% if current_user.is_authenticated %}
+    {% include 'layout/footer.html' %}
+  {% endif %}
+
+</body>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js" integrity="sha384-L2pyEeut/H3mtgCBaUNw7KWzp5n9+4pDQiExs933/5QfaTh8YStYFFkOzSoXjlTb" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/jquery.tablesorter.min.js" integrity="sha384-QnFIXbEfAgO7z63b/aNzTSdSNLoNiNX/mk/Ok+NpUNMnvriWLo5cOtB0OUCAdKNu" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/js/swiper.min.js" integrity="sha384-fOtis9P3S4B2asdoye1/YBpXMaRmuXu925gZhfQA/gnU3dLnftD8zvpk/lhP0YSG" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/boosted@4.5.0/dist/js/boosted.min.js" integrity="sha384-R024d8eLkqTtaLUSJ9MrQ9ay65hb/spmrvV7W1B2MuguSjYsCx3KVKjdjc9zUbPb" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script> {# use for sort and pagination table #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="{{ url_for('static',filename='js/script.js') }}"></script>
+{% block script %} {% endblock %}
+</html>

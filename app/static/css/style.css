@@ -1,0 +1,105 @@
+.login {
+  margin: 20px auto;
+  width: 300px;
+}
+
+.register {
+  margin: 20px auto;
+  width: 400px;
+}
+
+.user {
+  margin: 20px;
+  width: 400px;
+}
+
+.error-page {
+  margin: 20px;
+}
+
+h1.error-page {
+  text-align: center;
+}
+
+a.error-page {
+  text-align: center;
+}
+
+.login-screen, .register-screen {
+  background-color: rgb(255, 255, 255);
+  padding: 20px;
+  border: 2px solid;
+  border-color: rgb(218, 215, 215);
+  border-radius: 5px;
+}
+
+.custom-file {
+  width: 400px;
+}
+
+.errors {
+  text-align: center;
+}
+
+.login-title, .register-title{
+  text-align: left;
+}
+
+.form-control {
+  text-align: left;
+}
+
+.login-form, .register-form{
+  text-align: left;
+}
+
+.login-link, .register-link {
+  text-align: right;
+  font-size: 12px;
+  color: #444;
+  display: block;
+  margin-top: 12px;
+}
+
+input {
+  text-align: center;
+  background-color: #ECF0F1;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  font-size: 16px;
+  font-weight: 200;
+  padding: 10px 0;
+  width: 250px;
+  transition: border .5s;
+}
+     
+.svg-settings::after {
+  width: 1rem;
+  height: 1rem;
+  background-size: 1rem;
+}
+  
+.skippy {
+  display: block;
+  padding: 1em;
+  color: #fff;
+  text-align: center;
+  background-color: #000;
+}
+  
+.skippy:hover {
+  color: #fff;
+}
+  
+.skippy-text {
+  padding: .5em;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+.dropdown-toggle::after {
+  display:none;
+}

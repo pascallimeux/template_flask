@@ -1,0 +1,38 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container-fluid"> 
+    <table id="mytable" class="table tablesorter mb-5">
+      <caption>
+        Images list
+        <a href="{{ url_for('image.image_add') }}"" class="btn btn-sm btn-secondary ml-3">Add image</a>
+      </caption>
+      <thead class="cf">
+        <tr>
+          <th scope="col" class="header">ID</th>
+          <th scope="col" class="header">Name</th>
+          <th scope="col" class="header">Type</th>
+          <th scope="col" class="header">Size</th>
+          <th scope="col" class="header">Recorded At</th>
+          <th scope="col" class="header">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for image in images%} 
+        <tr> 
+          <td class="align-middle">{{ image.id }}</td>
+          <td class="align-middle">{{ image.name|title }}</td>
+          <td class="align-middle">{{ media_types_list(image.mtype).name.capitalize() }} </td>
+          <td class="align-middle">{{ image.size }}</td>
+          <td class="align-middle">{{ image.recorded_at.strftime('%y/%m/%d %H:%M') }}</td>
+          <td class="align-middle">
+            <a href="{{ url_for('image.image_view', imageid=image.id) }}" class="btn btn-sm btn-primary">View</a>
+            <a href="{{ url_for('image.image_delete', imageid=image.id) }}" class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+{% endblock %}

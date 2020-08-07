@@ -1,0 +1,49 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container-fluid"> 
+    <table id="mytable" class="table tablesorter mb-5">
+      <caption>
+        Users list
+        {% if admin %}
+          <a href="{{ url_for('user.user_add') }}"" class="btn btn-sm btn-secondary ml-3">Add user</a>
+        {% endif %}
+      </caption>
+      <thead class="cf">
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Username</th>
+          <th scope="col">Email</th>
+          <th scope="col">Role</th>
+          <th scope="col">Is active</th>
+          <th scope="col">Connected</th>
+          <th scope="col">Created At</th>
+          <th scope="col">Last login</th>
+          {% if admin %}
+            <th scope="col">Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %} 
+        <tr> 
+          <td class="align-middle">{{ user.id }}</td>
+          <td class="align-middle">{{ user.username|title }}</td>
+          <td class="align-middle">{{ user.email }}</td>
+          <td class="align-middle">{{ roles_list(user.role).name.capitalize() }} </td>
+          <td class="align-middle">{{ user.active }}</td>
+          <td class="align-middle">{{ user.connected }}</td>
+          <td class="align-middle">{{ user.created_at.strftime('%y/%m/%d %H:%M') }}</td>
+          <td class="align-middle">{{ user.last_login.strftime('%y/%m/%d %H:%M') if user.last_login }}</td>
+          {% if admin %}
+            <td class="align-middle">
+              <a href="{{ url_for('user.user_edit', userid=user.id) }}" class="btn btn-sm btn-primary">Edit</a>
+              <a href="{{ url_for('user.user_delete', userid=user.id) }}" class="btn btn-sm btn-danger">Delete</button>
+            </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+</div>
+
+{% endblock %}

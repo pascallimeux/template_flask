@@ -1,0 +1,56 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+<form action="{{ url_for('auth.login') }}"  method="post">
+
+    <div class="login">
+        <div class="login-screen">
+            <div class="login-title">
+                <h1>Login</h1>
+            </div>
+            <div class="login-form">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.username.label(class="form-label") }}
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control is-invalid") }}
+                        <ul class="errors invalid-feedback">
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.username(class="form-control" ) }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control is-invalid") }}
+                        <ul class="errors invalid-feedback">
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ form.password(class="form-control" ) }}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input class="custom-control-input" type="checkbox" id="remember" name="remember">
+                      {{ form.remember.label(class="custom-control-label") }}
+                    </div>
+                  </div>
+
+                {{ form.submit(class="btn btn-lg btn-primary btn-block", value="Submit")}}
+                
+            </div>
+            <div class="login-link">
+                <a href="{{ url_for('auth.register') }}" >Register</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

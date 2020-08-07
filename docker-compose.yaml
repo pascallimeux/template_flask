@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+      
+  web:
+    image: app:0.0.1
+    container_name: myapp
+    restart: on-failure
+    depends_on:
+      - mongo
+    environment:
+      - MONGODBHOST=mongodb://mongo:27017/mydb
+      - LOGLEVEL=INFO
+      - FLASK_DEBUG=0
+      - SECURE_MODE=1
+    ports:
+      - "5000:5000"
+    
+    command: sh -c "python run.py"
+    #command: sh -c "sleep 10000"
+
+  mongo:
+    image: mongo
+    container_name: mongoDB
+    restart: unless-stopped
+
+    ports:
+      - "27017:27017"
+    
+    command: mongod --port 27017
+    #command: sh -c "sleep 10000"
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongoVisu
+    restart: on-failure:5
+    links:
+      - mongo
+    ports:
+      - 8081:8081

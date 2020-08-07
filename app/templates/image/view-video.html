@@ -1,0 +1,13 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+      <div class="col">
+        <video  controls>
+          <source src="data:;base64,{{ video }}" type="video/mp4"/>
+        </video>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

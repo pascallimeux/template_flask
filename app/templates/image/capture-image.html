@@ -1,0 +1,24 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<p>Record pictures and video.</p>
+<p><button id="record" disabled>Record</button> <button id="stop" disabled>Stop</button> <button id="snap">Snap</button></p>
+<div class="row"></div>
+    <figure>
+        <video id="live" width="640" height=480></video><br />
+        <caption>live preview</caption>
+    </figure>
+    <figure>
+        <video id="recording" controls width="1280" height=720></video><br />
+        <caption>recorded clip</caption>
+    </figure>
+    <figure>
+        <canvas id="picture" controls width=1280 height=720></canvas><br />
+        <caption>picture</caption>
+    </figure>
+  </div>
+{% endblock %}
+
+{% block script %} 
+<script src="{{ url_for('static',filename='js/capture.js') }}"></script>
+{% endblock %}

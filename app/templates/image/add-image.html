@@ -1,0 +1,25 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+      <div class="row">
+         <div class="col">
+           <div class="mb-3 mt-3">
+   
+             <h2 class="mb-3" style="font-weight: 300">Upload image</h2>
+   
+             <form action="{{ url_for('image.image_add') }}" method="POST" enctype="multipart/form-data" class="mb-3">
+               <div class="form-group mb-3">
+                 <div class="custom-file">
+                   <input type="file" class="custom-file-input" name="image">
+                   <label id="file_input_label" class="custom-file-label" for="image">Select file</label>
+                   <small class="text-muted">Images should have jpg or png format</small>
+                 </div>
+               </div>
+   
+               <button type="submit" class="btn btn-primary">Upload</button>
+             </form>
+           </div>
+         </div>
+       </div> 
+{% endblock %}
