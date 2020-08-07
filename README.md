@@ -12,7 +12,7 @@ openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -da
 openssl x509 -in server.crt -text
 ```
 
-## build source code tgz
+## build tgz archive of source
 
 ```
 make tgz
@@ -77,9 +77,10 @@ make deploy VMIP=X.X.X.X VMPORT=XXXX VMUSER=toto
 ```
 
 
-### Process to install from github
+### Process to install from github (requirements: make docker docker-compose)
 
 ```
-git clone 
-make setup
+git clone https://github.com/pascallimeux/template_flask.git
+cd template_flask
+make setup initdb startdb run
 ```
