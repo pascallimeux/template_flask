@@ -9,14 +9,18 @@ RESET  := $(shell tput -Txterm sgr0)
 
 SHELL := /bin/bash
 export PROJECTPATH:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+include .env
 
-# Docker image for app
-APP_VERSION=0.0.1
-APP_IMAGE_NAME=app
-
-# folders
 BUILDFOLDER=${PROJECTPATH}/build
-CERTFOLDER=${PROJECTPATH}/cert
+KEYFILEPATH=${PROJECTPATH}/${KEYFILE}
+CRTFILEPATH=${PROJECTPATH}/${CERTFILE}
+LOCALIP = $(shell ifconfig | grep -Eo 'inet (addr:)?([0-;9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | awk '{print $1}')
+
+ifeq (${SECURE_MODE},1)
+PROTOCOL := https
+else
+PROTOCOL := http
+endif
 
 # Python env
 VENV=.venv
@@ -24,13 +28,15 @@ VENV_ACTIVATE= source ${VENV}/bin/activate
 PYTHON= ${VENV}/bin/python3
 PIP=${VENV}/bin/pip
 
-# VM configuration
-VMIP ?= 192.168.20.121
-VMPORT ?= 5000
-VMUSER = pascal
 
+startdb: ##@DB Start mongoDB container.
+	@docker-compose up -d mongo mongo-express
+	@docker ps
 
-setup: ##@Dev Setup local dev environment.
+cleardb: ##@DB Stop and clear mongoDB container.
+	@docker-compose down
+
+setup: ##@Dev Install Python virtual environment.
 	@if [ ! -d ${VENV} ]; then \
 	    python3.8 -m venv ${VENV} || (echo "create ${VENV} failed $$?"; exit 1) && \
         ${PIP} install -r requirements.txt || (echo "install python modules failed $$?"; exit 1) && \
@@ -39,50 +45,55 @@ setup: ##@Dev Setup local dev environment.
         echo "Python venv already exists!"; \
     fi
 
-run: ##@Dev Run main.py
-	@export FLASK_DEBUG=1 && export FLASK_ENV=development && ${PYTHON} run.py
-    
-clear: ##@Dev Clear local dev environment.
-	@rm -Rf ${VENV} 
-	@rm -Rf __pycache__/
-	@rm -Rf ${CERTFOLDER}
-	@rm -Rf ${BUILDFOLDER}
-	@find . -name app.tgz -delete 
-	@find . -name '*.pyc' -delete
-	@echo "Python virtual environment removed."
 
-startdb: ##@DB Start mongoDB container.
-	@docker-compose up -d mongo mongo-express
-
-initdb: ##@DB Init admin account in DB.
+init: ##@Dev Init admin account in DB and secretkey for flask.
+	@if [ -n ${LOCALIP} ]; then echo use local ip:${LOCALIP} to configure app; else echo "${RED}No IP connection ${RESET}"; exit 1; fi
 	@docker-compose up -d mongo mongo-express
 	@${VENV_ACTIVATE} && export FLASK_APP=run.py  && flask initdb admin
+	@${VENV_ACTIVATE} && export FLASK_APP=run.py  && flask gensecretkey
+	@${VENV_ACTIVATE} && export SERVER_IP=${LOCALIP} && export FLASK_APP=run.py  && flask setipserver
+	$(call GenKeys,${LOCALIP}, ${CRTFILEPATH},${KEYFILEPATH})
 	@docker-compose stop
 
-cleardb: ##@DB Stop and clear mongoDB container.
-	@docker-compose down
 
-docker: ##@Docker Build docker container (default VMIP=192.168.20.53 VMPORT=5000)
-	$(call GenKeys)
+env: ##@Dev Display configuration. 
+	@$(call DisplayEnv)
+
+run: ##@Dev Start Python application (needed DB)
+	@export SERVER_IP=${LOCALIP} && export FLASK_DEBUG=1 && export FLASK_ENV=development && ${PYTHON} run.py
+
+clear: ##@Dev Clear local dev environment.
+	@rm -Rf __pycache__/
+	@find . -name '*.pyc' -delete
+	@if [ -d ${VENV} ]; then rm -rf ${VENV} && echo "Python virtual environment removed"; fi
+	@if [ -d ${BUILDFOLDER} ]; then rm -rf ${BUILDFOLDER}/* && echo "Build folder removed"; else mkdir ${BUILDFOLDER}; fi	
+	@if [ -f ${KEYFILEPATH} ]; then rm ${KEYFILEPATH} &&  echo Delete ${KEYFILEPATH}; fi
+	@if [ -f ${CRTFILEPATH} ]; then rm ${CRTFILEPATH} &&  echo Delete ${CRTFILEPATH}; fi
+
+
+docker: ##@Docker Build docker container
 	$(call CreateBuild)
+	$(call GenKeys,${LOCALIP},${BUILDFOLDER}/${CERTFILE},${BUILDFOLDER}/${KEYFILE})
 	@cd ${BUILDFOLDER} && docker build -t ${APP_IMAGE_NAME}:${APP_VERSION} .
 	@docker images |grep ${APP_IMAGE_NAME}
 
 
 docker-run: ##@Docker Start server in docker container
-	@docker-compose up -d
+	@export SERVER_IP=${LOCALIP} && docker-compose up -d
 
 tgz: clear
-	@echo build app.tgz
-	@cd .. && tar czf app.tgz ./template_flask && mv app.tgz ${PROJECTPATH}/
+	@echo build  ${BUILDFOLDER}/app.tgz
+	@cd .. && tar czf app.tgz ./template_flask && mv app.tgz ${BUILDFOLDER}/app.tgz
 
-rconfig: ##@Remote Display configuration for deploiement. 
-	@$(call DisplayEnv)
 
-deploy: docker ##@Remote Deploy application on VM (default VMIP=192.168.20.121 VMPORT=5000)
-	@echo "${GREEN} > save locale docker image:  /tmp/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${RESET}"
-	@docker save ${APP_IMAGE_NAME}:${APP_VERSION} > /tmp/${APP_IMAGE_NAME}:${APP_VERSION}.tgz
+deploy: ##@Remote Deploy application on VM
+	$(call CreateBuild)
+	$(call GenKeys,${VMIP},${BUILDFOLDER}/${CERTFILE},${BUILDFOLDER}/${KEYFILE})
+	@cd ${BUILDFOLDER} && docker build -t ${APP_IMAGE_NAME}:${APP_VERSION} .
+	@echo "${GREEN} > save locale docker image:  ${BUILDFOLDER}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${RESET}"
+	@docker save ${APP_IMAGE_NAME}:${APP_VERSION} > ${BUILDFOLDER}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz
 	@ssh-copy-id ${VMUSER}@${VMIP}
+	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down; docker rmi ${APP_IMAGE_NAME}:${APP_VERSION}; rm -rf /home/${VMUSER}/${APP_IMAGE_NAME}'
 	@ssh $(VMUSER)@$(VMIP) 'mkdir /home/${VMUSER}/${APP_IMAGE_NAME}'
 	@echo "${GREEN} > transfert files from local to ${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME} ${RESET}"
 	@scp /tmp/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${VMUSER}@${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME}
@@ -138,34 +149,31 @@ help: ##@other Show this help.
 	@$(call Banner)
 	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
-
+# params IP CRTFILEPATH KEYFILEPATH
 define GenKeys
-	@echo "${GREEN} > generate keys and certificates for server:${VMIP} ${RESET}"
-	@if [ -d ${CERTFOLDER} ]; then rm -rf ${CERTFOLDER}; fi
-	@mkdir ${CERTFOLDER}
-	openssl req -x509 -newkey rsa:4096 -nodes -out ${CERTFOLDER}/server.crt -keyout ${CERTFOLDER}/server.key -days 365 -new -subj "/C=FR/ST=Paris/L=Paris/O=Orange/OU=R&D/CN=${VMIP}"
+	@echo "${GREEN}Generate keys and certificates for server:$1 ${RESET}"
+	@openssl req -x509 -newkey rsa:4096 -nodes -out $2 -keyout $3 -days 365 -new -subj "/C=FR/ST=Paris/L=Paris/O=Orange/OU=R&D/CN=$1"
 endef
 
 
 define CreateBuild
-	@echo "${GREEN} > Update code with server address=$(VMIP):$(VMPORT) ${RESET}"
-	@if [ -d ${BUILDFOLDER} ]; then rm -rf ${BUILDFOLDER}; fi
-	@mkdir ${BUILDFOLDER}
+	@if [ -d ${BUILDFOLDER} ]; then rm -rf ${BUILDFOLDER}/*; else mkdir ${BUILDFOLDER}; fi
 	@cp -R app ${BUILDFOLDER}
-	@cp -R cert ${BUILDFOLDER}
 	@cp Dockerfile ${BUILDFOLDER}
 	@cp requirements.txt ${BUILDFOLDER}
 	@cp run.py ${BUILDFOLDER}
-	@sed -i -e 's/const url=.*/const url=\"https:\/\/$(VMIP):$(VMPORT)\"/g' ${BUILDFOLDER}/app/static/js/script.js
+	#@sed -i -e 's/const url=.*/const url=\"https:\/\/$(VMIP):$(VMPORT)\"/g' ${BUILDFOLDER}/app/static/js/settings.js
 endef
 
 
 define DisplayEnv
     echo "${WHITE}"
-    echo "  IP VM -------------- ${VMIP}"
-    echo "  USER ON VM --------- ${VMUSER}"
-    echo "  SERVER PORT ON VM -- ${VMPORT}"
-    echo "  APP VERSION -------- ${APP_VERSION}"
+    echo "  VM URL -------------- https://${VMIP}:${VMPORT}"
+    echo "  VM USER ------------- ${VMUSER}"
+	echo
+	echo "  LOCAL URL ----------- ${PROTOCOL}://${LOCALIP}:${SERVER_PORT}"
+	echo "  LOG LEVEL ----------- ${LOG_LEVEL}"
+    echo "  DOCKER IMAGE -------- ${APP_IMAGE_NAME}:${APP_VERSION}"
     echo "${RESET}"
 endef
 

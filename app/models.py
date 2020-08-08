@@ -7,7 +7,7 @@ from enum import IntEnum
 import qrcode
 from base64 import b64encode
 
-from .config import Config
+from .config import Config, LOGGER
 
 db = MongoEngine()
 
@@ -132,7 +132,7 @@ def init_db(username, password):
                     role=int(UserRole.ADMIN))
    
     admin.create()
-    print( "account created: login({}), password({}).".format(username, password))
+    LOGGER.info( "Account {0} created: login({0}), password({1}).".format(username, password))
 
 
 class Visitor(db.Document):

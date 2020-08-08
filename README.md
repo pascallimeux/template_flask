@@ -4,6 +4,7 @@
 
 ```
 openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -days 365 -new -subj "/C=IL/ST=Tel Aviv/L=Tel Aviv/O=ONU/OU=Def/CN=samaritan"
+openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -days 1000 -new -subj "/C=FR/ST=PAris/L=Paris/O=Orange/OU=R&D Department/CN=production"
 ```
 
 ## read certificate in cert folder

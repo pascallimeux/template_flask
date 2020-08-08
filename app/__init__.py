@@ -3,6 +3,10 @@ import click
 import json
 import os
 import io
+import string
+import random
+import fileinput
+import sys
 from flask import Flask, render_template, url_for, request, abort, redirect, flash, session, send_file
 from flask_login import login_required, LoginManager, login_user, logout_user, current_user
 from flask_socketio import SocketIO
@@ -11,7 +15,7 @@ from flask_cors import CORS
 from base64 import b64encode
 
 from . import config
-from .config import LOGGER
+from .config import LOGGER, SERVER_PORT, SERVER_IP, SECURE_MODE
 from .models import init_db, db, User, Image, UserRole
 from .home import home as home_blueprint
 from .auth import auth as auth_blueprint
@@ -19,8 +23,6 @@ from .user import user as user_blueprint
 from .image import image as image_blueprint
 from .admin import admin as admin_blueprint
 from .apis import v1
-
-socketio = SocketIO(cors_allowed_origins="*", engineio_logger=False)
 
 def create_app():
     app = Flask(__name__)
@@ -32,11 +34,18 @@ def create_app():
     app.config.from_object('app.config.Config')
     #app.debug = True
     
-    
+    # init mongo db
     db.init_app(app)
-    login_manager.init_app(app)
-    #mail = Mail(app)
     
+    # init login manager
+    login_manager.init_app(app)
+
+    
+    # flask socketio
+    socketio.init_app(app)
+
+    #mail = Mail(app)
+
     # flask web
     app.register_blueprint(home_blueprint)
     app.register_blueprint(auth_blueprint)
@@ -47,8 +56,6 @@ def create_app():
     # flask restful
     app.register_blueprint(v1, url_prefix='/api/v1')
 
-    # flask sockerio
-    socketio.init_app(app)
 
     @login_manager.user_loader
     def load_user(id):
@@ -81,7 +88,7 @@ def create_app():
     
     return app
 
-
+socketio = SocketIO(cors_allowed_origins="*", engineio_logger=False)
 app = create_app()
 
 
@@ -91,3 +98,37 @@ app = create_app()
 def create_user(password='admin'):
     """Initialize the database."""
     init_db('admin', password)
+
+
+@app.cli.command("gensecretkey")
+def generate_secret_key():
+    """Generate a secret key for flask and copy it in config.py."""
+    secret_key = ''.join(random.choice(string.ascii_letters + string.digits) for i in range(24))
+    path = os.path.dirname(__file__)
+    py_config_file_path = path + '/config.py'
+    line = "secretkey  = \"{}\"".format(secret_key)
+    replace_string_in_file(py_config_file_path, "secretkey  =", line)
+    LOGGER.info("Secret key generated: {}".format(line))
+
+
+@app.cli.command("setipserver")
+def set_ip_server():
+    """Update IP address of server in js file."""
+    """@sed -i -e 's/const url=.*/const url=\"https:\/\/$(LOCALIP):$(VMPORT)\"/g' ${PROJECTPATH}/app/static/js/settings.js"""
+    path = os.path.dirname(__file__)
+    js_config_file_path = path + '/static/js/settings.js'
+    protocol = "http"
+    if SECURE_MODE == 1:
+        protocol = "https"
+
+    line = "const url = \"{}://{}:{}\"".format(protocol, SERVER_IP, SERVER_PORT)
+    replace_string_in_file(js_config_file_path, "const url =", line)
+    LOGGER.info("Config file for JS updated: \"{}\"".format(line))
+
+
+def replace_string_in_file(filename, search_str, replace_line):
+    with fileinput.input(filename, inplace=True) as f:
+        for line in f:
+            if search_str in line:
+                line = "{}\n".format(replace_line)
+            print(line, end='')

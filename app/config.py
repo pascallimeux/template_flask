@@ -1,23 +1,25 @@
-# To generate a new secret key:
-# >>> import random, string
-# >>> "".join([random.choice(string.printable) for _ in range(24)])
+
 import os
 import logging
 import coloredlogs
 from datetime import timedelta
 
-SERVER_PORT = 5000
-SERVER_IP   = '0.0.0.0'
-KEYFILE     = 'cert/server.key'
-CERTFILE    = 'cert/server.crt'
-SECURE_MODE = os.getenv('SECURE_MODE', 0)
+path = os.path.dirname(__file__)
+project_path = os.path.abspath(os.path.join(path, os.pardir))
 
+SERVER_PORT = int(os.getenv('SERVER_PORT', 5000))
+SERVER_IP   = os.getenv('SERVER_IP', '0.0.0.0')
+SECURE_MODE = os.getenv('SECURE_MODE', 1)
+KEYFILE     = "{}/{}".format(project_path, os.getenv('KEYFILE','server.key'))
+CERTFILE    = "{}/{}".format(project_path, os.getenv('CERTFILE','server.crt'))
+mongohost  = os.getenv('MONGODBHOST', 'mongodb://localhost:27017/mydb')
+loglevel   = os.getenv('LOGLEVEL', 'DEBUG')
+secretkey  = "8p6e7cL6pvwjZMPwTPjLeenM"
 
 class Config():
-    MONGODB_HOST = os.getenv('MONGODBHOST', 'mongodb://localhost:27017/mydb')
-    LOG_LEVEL = os.getenv('LOGLEVEL', 'DEBUG')
-    
-    SECRET_KEY = "+K[HC#<ufx0bR$x9S-0<^TINC"
+    MONGODB_HOST = mongohost
+    LOG_LEVEL = loglevel
+    SECRET_KEY = secretkey
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_DURATION = timedelta(days=1)
     CSRF_ENABLED = True
