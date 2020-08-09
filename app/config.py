@@ -3,6 +3,8 @@ import os
 import logging
 import coloredlogs
 from datetime import timedelta
+from dotenv import load_dotenv
+load_dotenv()
 
 path = os.path.dirname(__file__)
 project_path = os.path.abspath(os.path.join(path, os.pardir))
@@ -14,7 +16,7 @@ KEYFILE     = "{}/{}".format(project_path, os.getenv('KEYFILE','server.key'))
 CERTFILE    = "{}/{}".format(project_path, os.getenv('CERTFILE','server.crt'))
 mongohost  = os.getenv('MONGODBHOST', 'mongodb://localhost:27017/mydb')
 loglevel   = os.getenv('LOGLEVEL', 'DEBUG')
-secretkey  = "8p6e7cL6pvwjZMPwTPjLeenM"
+secretkey  = "iiw8SneMNhjJuwcJqxea77YN"
 
 class Config():
     MONGODB_HOST = mongohost

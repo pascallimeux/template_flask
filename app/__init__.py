@@ -117,7 +117,8 @@ def set_ip_server():
     path = os.path.dirname(__file__)
     js_config_file_path = path + '/static/js/settings.js'
     protocol = "http"
-    if SECURE_MODE == 1:
+
+    if SECURE_MODE == '1':
         protocol = "https"
 
     line = "const url = \"{}://{}:{}\"".format(protocol, SERVER_IP, SERVER_PORT)
