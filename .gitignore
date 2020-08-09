@@ -4,5 +4,5 @@ coverage/
 build/
 .pyc
 __pycache__
-server.crt
-server.key
+**/server.crt
+**/server.key
