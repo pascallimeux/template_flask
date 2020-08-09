@@ -39,3 +39,5 @@ ajouter un bouton dans la page de capture pour couper le son
 resoudre le probleme de passage de l'adresse IP d'un client dans le container docker
 
 
+faire le readme plus propre 
+revoir affcichage des actions sur le makefile

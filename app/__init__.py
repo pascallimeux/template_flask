@@ -114,7 +114,6 @@ def generate_secret_key():
 @app.cli.command("setipserver")
 def set_ip_server():
     """Update IP address of server in js file."""
-    """@sed -i -e 's/const url=.*/const url=\"https:\/\/$(LOCALIP):$(VMPORT)\"/g' ${PROJECTPATH}/app/static/js/settings.js"""
     path = os.path.dirname(__file__)
     js_config_file_path = path + '/static/js/settings.js'
     protocol = "http"

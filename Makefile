@@ -34,7 +34,7 @@ startdb: ##@DB Start mongoDB container.
 	@docker ps
 
 cleardb: ##@DB Stop and clear mongoDB container.
-	@docker-compose down
+	@docker-compose down mongo mongo-express
 
 setup: ##@Dev Install Python virtual environment.
 	@if [ ! -d ${VENV} ]; then \
@@ -46,7 +46,7 @@ setup: ##@Dev Install Python virtual environment.
     fi
 
 
-init: ##@Dev Init admin account in DB and secretkey for flask.
+init: ##@Dev Init admin account in DB, secretkey for flask and set IP address on javascript config file
 	@if [ -n ${LOCALIP} ]; then echo use local ip:${LOCALIP} to configure app; else echo "${RED}No IP connection ${RESET}"; exit 1; fi
 	@docker-compose up -d mongo mongo-express
 	@${VENV_ACTIVATE} && export FLASK_APP=run.py  && flask initdb admin
@@ -87,8 +87,11 @@ tgz: clear
 
 
 deploy: ##@Remote Deploy application on VM
+	@echo deploy application on server ${VMIP}
 	$(call CreateBuild)
 	$(call GenKeys,${VMIP},${BUILDFOLDER}/${CERTFILE},${BUILDFOLDER}/${KEYFILE})
+	@${VENV_ACTIVATE} && cd ${BUILDFOLDER} && export FLASK_APP=run.py  && flask gensecretkey
+	@sed -i -e 's/const url =.*/const url=\"https:\/\/$(VMIP):$(VMPORT)\"/g' ${BUILDFOLDER}/app/static/js/settings.js
 	@cd ${BUILDFOLDER} && docker build -t ${APP_IMAGE_NAME}:${APP_VERSION} .
 	@echo "${GREEN} > save locale docker image:  ${BUILDFOLDER}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${RESET}"
 	@docker save ${APP_IMAGE_NAME}:${APP_VERSION} > ${BUILDFOLDER}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz
@@ -96,8 +99,10 @@ deploy: ##@Remote Deploy application on VM
 	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down; docker rmi ${APP_IMAGE_NAME}:${APP_VERSION}; rm -rf /home/${VMUSER}/${APP_IMAGE_NAME}'
 	@ssh $(VMUSER)@$(VMIP) 'mkdir /home/${VMUSER}/${APP_IMAGE_NAME}'
 	@echo "${GREEN} > transfert files from local to ${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME} ${RESET}"
-	@scp /tmp/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${VMUSER}@${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME}
+	@scp ${BUILDFOLDER}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz ${VMUSER}@${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME}
 	@scp ${PROJECTPATH}/docker-compose.yaml ${VMUSER}@${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME}
+	@echo -e "SERVER_PORT=${VMPORT}\nCERTFILE=${CERTFILE}\nKEYFILE=${KEYFILE}\n" > ${BUILDFOLDER}/.env
+	@scp ${BUILDFOLDER}/.env ${VMUSER}@${VMIP}:/home/${VMUSER}/${APP_IMAGE_NAME}
 	@echo "${GREEN} > load image ${APP_IMAGE_NAME}:${APP_VERSION} on server ${VMIP} ${RESET}"
 	@ssh $(VMUSER)@$(VMIP) 'docker load -i /home/${VMUSER}/${APP_IMAGE_NAME}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz; rm /home/${VMUSER}/${APP_IMAGE_NAME}/${APP_IMAGE_NAME}:${APP_VERSION}.tgz'
 
@@ -106,7 +111,7 @@ rinitdb: ##@Remote Init database on remote VM
 	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down'
 	@echo "${GREEN} > start docker containers on remote server ${VMIP} ${RESET}"
 	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose up -d'
-	@echo "${GREEN} > init database on remote server ${VMIP} ${RESET}"	
+	@echo "${GREEN} > init database and secret key on remote server ${VMIP} ${RESET}"	
 	@ssh $(VMUSER)@$(VMIP) 'docker exec  myapp bash -c "export FLASK_APP=run.py  && flask initdb admin"'
 
 rstop: ##@Remote Stop application on remote VM
@@ -117,13 +122,13 @@ rstart: ##@Remote Start application on remote VM
 	@echo "${GREEN} > starting container on remote server ${VMIP} ${RESET}"
 	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose up -d'
 
-rdown: ##@Remote Down application on remote VM
+rdown: ##@Remote Delete containers on remote VM
 	@echo "${GREEN} > remove container on remote server ${VMIP} ${RESET}"
 	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down'
 
 rclean: ##@Remote Remove application on remote VM
 	@echo "${GREEN} > remove application and container on remote server ${VMIP} ${RESET}"
-	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down; docker rmi ${APP_IMAGE_NAME}:${APP_VERSION}; rm -rf /home/${VMUSER}/${APP_IMAGE_NAME}'
+	@ssh $(VMUSER)@$(VMIP) 'cd /home/${VMUSER}/${APP_IMAGE_NAME} && docker-compose down ; docker rmi ${APP_IMAGE_NAME}:${APP_VERSION} > /dev/null 2>&1; rm -rf /home/${VMUSER}/${APP_IMAGE_NAME} > /dev/null 2>&1'
 
 define Banner
     echo
