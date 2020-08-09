@@ -48,6 +48,7 @@ cleardb: ##@DB Stop and clear mongoDB container.
 setup: ##@Dev Install Python virtual environment.
 	@if [ ! -d ${VENV} ]; then \
 	    python3.8 -m venv ${VENV} || (echo "create ${VENV} failed $$?"; exit 1) && \
+		${PIP} install wheel && \
         ${PIP} install -r requirements.txt || (echo "install python modules failed $$?"; exit 1) && \
         echo "Python virtual environment installed."; \
 	else \
@@ -186,6 +187,7 @@ define DisplayEnv
     echo "  VM USER ------------- ${VMUSER}"
 	echo
 	echo "  LOCAL URL ----------- ${PROTOCOL}://${LOCALIP}:${SERVER_PORT}"
+	echo "  LOCAL OS ------------ ${OS}"
 	echo "  LOG LEVEL ----------- ${LOG_LEVEL}"
     echo "  DOCKER IMAGE -------- ${APP_IMAGE_NAME}:${APP_VERSION}"
     echo "${RESET}"

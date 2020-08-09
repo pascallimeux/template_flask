@@ -102,7 +102,12 @@ make setup deploy rinitdb rstart to run docker app in remote VM
 
 
 
+docker, docker-compose, 
+sudo apt-get update -y
+sudo apt-get install make net-tools curl git  -y
 
 
-sudo apt-get install make gcc net-tools libpq-dev -y
-sudo apt-get install python3-dev python3-pip python3-venv python3-wheel -y
+sudo apt-get install gcc libpq-dev -y && \
+sudo apt-get install python-dev  -y && \
+sudo apt-get install python3-dev python3-pip python3-venv python3-wheel -y && \
+pip3 install wheel
