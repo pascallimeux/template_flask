@@ -1,3 +1,4 @@
+wheel==0.34.2
 pylint==2.4.4
 coloredlogs==14.0
 Flask==1.1.2

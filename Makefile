@@ -14,7 +14,16 @@ include .env
 BUILDFOLDER=${PROJECTPATH}/build
 KEYFILEPATH=${PROJECTPATH}/${KEYFILE}
 CRTFILEPATH=${PROJECTPATH}/${CERTFILE}
+
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
 LOCALIP = $(shell ifconfig | grep -Eo 'inet (addr:)?([0-;9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | awk '{print $1}')
+endif
+
+ifeq ($(OS), Linux)
+LOCALIP = $(shell ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
+endif
+
 
 ifeq (${SECURE_MODE},1)
 PROTOCOL := https

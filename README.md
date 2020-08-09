@@ -98,3 +98,11 @@ make setup init docker docker-run to run docker app
 
 make setup deploy rinitdb rstart to run docker app in remote VM
 ```
+
+
+
+
+
+
+sudo apt-get install make gcc net-tools libpq-dev -y
+sudo apt-get install python3-dev python3-pip python3-venv python3-wheel -y
