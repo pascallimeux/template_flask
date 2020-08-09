@@ -87,7 +87,12 @@ make deploy
 ```
 
 
-### Process to install from github (requirements: make docker docker-compose)
+### Process to install from github
+
+#### requirements
+* docker
+* docker-compose
+* sudo apt-get update -y && sudo apt-get install make net-tools curl git python3-venv -y
 
 ```
 git clone https://github.com/pascallimeux/template_flask.git
@@ -98,15 +103,3 @@ make setup init docker docker-run to run docker app
 
 make setup deploy rinitdb rstart to run docker app in remote VM
 ```
-
-
-
-
-docker, docker-compose, 
-sudo apt-get update -y && sudo apt-get install make net-tools curl git python3-venv -y
-
-
-sudo apt-get install gcc libpq-dev -y && \
-sudo apt-get install python-dev  -y && \
-sudo apt-get install python3-dev python3-pip python3-venv python3-wheel -y && \
-pip3 install wheel
