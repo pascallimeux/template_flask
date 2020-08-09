@@ -16,7 +16,7 @@ KEYFILE     = "{}/{}".format(project_path, os.getenv('KEYFILE','server.key'))
 CERTFILE    = "{}/{}".format(project_path, os.getenv('CERTFILE','server.crt'))
 mongohost  = os.getenv('MONGODBHOST', 'mongodb://localhost:27017/mydb')
 loglevel   = os.getenv('LOGLEVEL', 'DEBUG')
-secretkey  = "iiw8SneMNhjJuwcJqxea77YN"
+secretkey  = "tsdJr9QohVeQJjDmIfpVtI2h"
 
 class Config():
     MONGODB_HOST = mongohost

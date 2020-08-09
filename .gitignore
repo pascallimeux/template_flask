@@ -1,8 +1,9 @@
+**/server.crt
+**/server.key
 .venv/
 .cache/
 coverage/
 build/
 .pyc
 __pycache__
-**/server.crt
-**/server.key
+
