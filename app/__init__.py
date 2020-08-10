@@ -15,7 +15,7 @@ from flask_cors import CORS
 from base64 import b64encode
 
 from . import config
-from .config import LOGGER, SERVER_PORT, SERVER_IP, SECURE_MODE
+from .config import LOGGER, SERVER_PORT, SERVER_IP, PROTOCOL
 from .models import init_db, db, User, Image, UserRole
 from .home import home as home_blueprint
 from .auth import auth as auth_blueprint
@@ -113,15 +113,11 @@ def generate_secret_key():
 
 @app.cli.command("setipserver")
 def set_ip_server():
-    """Update IP address of server in js file."""
+    """Update IP address of server in js config file."""
     path = os.path.dirname(__file__)
     js_config_file_path = path + '/static/js/settings.js'
-    protocol = "http"
 
-    if SECURE_MODE == '1':
-        protocol = "https"
-
-    line = "const url = \"{}://{}:{}\"".format(protocol, SERVER_IP, SERVER_PORT)
+    line = "const url = \"{}://{}:{}\"".format(PROTOCOL, SERVER_IP, SERVER_PORT)
     replace_string_in_file(js_config_file_path, "const url =", line)
     LOGGER.info("Config file for JS updated: \"{}\"".format(line))
 

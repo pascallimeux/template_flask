@@ -11,12 +11,19 @@ project_path = os.path.abspath(os.path.join(path, os.pardir))
 
 SERVER_PORT = int(os.getenv('SERVER_PORT', 5000))
 SERVER_IP   = os.getenv('SERVER_IP', '0.0.0.0')
-SECURE_MODE = os.getenv('SECURE_MODE', 1)
+
+SECUREMODE = os.getenv('SECURE_MODE', 1)
+SECURE_MODE = True
+PROTOCOL = "https"
+if SECUREMODE == '0':
+    SECURE_MODE = False
+    PROTOCOL = "http"
+
 KEYFILE     = "{}/{}".format(project_path, os.getenv('KEYFILE','server.key'))
 CERTFILE    = "{}/{}".format(project_path, os.getenv('CERTFILE','server.crt'))
 mongohost  = os.getenv('MONGODBHOST', 'mongodb://localhost:27017/mydb')
 loglevel   = os.getenv('LOGLEVEL', 'DEBUG')
-secretkey  = "tsdJr9QohVeQJjDmIfpVtI2h"
+secretkey  = "GWRiUGSgio06MEIKVy50xiZ8"
 
 class Config():
     MONGODB_HOST = mongohost
@@ -47,8 +54,12 @@ def display_config():
     '''
     Sent configuration to logger
     '''
-    LOGGER.info(" * Logger level: %s, " % (LOG_LEVEL))
-    LOGGER.info(" * DB host:      %s, " % (MONGODB_HOST))
+    LOGGER.info(" * LOGGER level: %s" % (loglevel))
+    LOGGER.info(" * DB host:      %s" % (mongohost))
+    LOGGER.info(" * SERVER url:   %s://%s:%s" % (PROTOCOL, SERVER_IP, SERVER_PORT))
+    if SECURE_MODE:
+        LOGGER.info(" * KEYFILE:      %s" % (KEYFILE))
+        LOGGER.info(" * CERTFILE:     %s" % (CERTFILE))
 
 config = Config()
 
