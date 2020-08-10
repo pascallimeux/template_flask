@@ -3,18 +3,6 @@
 ## update .env to define environment variables
 
 
-## generate certificate in cert folder
-
-```
-openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -days 365 -new -subj "/C=IL/ST=Tel Aviv/L=Tel Aviv/O=ONU/OU=Def/CN=samaritan"
-openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -days 1000 -new -subj "/C=FR/ST=PAris/L=Paris/O=Orange/OU=R&D Department/CN=production"
-```
-
-## read certificate in cert folder
-
-```
-openssl x509 -in server.crt -text
-```
 
 ## build tgz archive of source
 Clear environment and build a tgz file for source code
@@ -98,8 +86,19 @@ make deploy
 git clone https://github.com/pascallimeux/template_flask.git
 cd template_flask
 make setup init startdb run to run python app
-
 make setup init docker docker-run to run docker app
-
 make setup deploy rinitdb rstart to run docker app in remote VM
+```
+
+
+## generate certificate in cert folder
+
+```
+openssl req -x509 -newkey rsa:4096 -nodes -out server.crt -keyout server.key -days 1000 -new -subj "/C=FR/ST=PAris/L=Paris/O=Orange/OU=R&D Department/CN=test"
+```
+
+## read certificate in cert folder
+
+```
+openssl x509 -in server.crt -text
 ```
